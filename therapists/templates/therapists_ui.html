@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Gestión de Terapeutas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+        }
+
+        form,
+        .filters,
+        table {
+            max-width: 800px;
+            margin-bottom: 30px;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        input,
+        textarea {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+        }
+
+        button {
+            margin-top: 15px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        th,
+        td {
+            padding: 10px;
+            border: 1px solid #ccc;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Registrar Terapeuta</h1>
+    <form id="therapist-form" enctype="multipart/form-data">
+        <label>Documento:</label>
+        <input type="text" name="document" required inputmode="numeric" pattern="\d{1,9}" maxlength="9"
+            title="Solo números (máximo 9 dígitos)" />
+
+        <label>Nombres:</label>
+        <input type="text" name="first_name" required />
+
+        <label>Apellidos:</label>
+        <input type="text" name="last_name" required />
+
+        <label>Número de Licencia:</label>
+        <input type="text" name="license_number" required inputmode="numeric" pattern="\d{1,20}" maxlength="20"
+            title="Solo números (máximo 20 dígitos)" />
+
+        <label>Años de Experiencia:</label>
+        <input type="text" name="years_experience" required inputmode="numeric" pattern="\d{1,2}" maxlength="2"
+            title="Solo números (máximo 2 dígitos)" />
+
+        <label>Teléfono:</label>
+        <input type="text" name="phone" required inputmode="numeric" pattern="\d{1,15}" maxlength="15"
+            title="Solo números (máximo 15 dígitos)" />
+
+        <label>Email:</label>
+        <input type="email" name="email" required />
+
+        <label>Dirección:</label>
+        <textarea name="address" required></textarea>
+
+        <label>Tarifa (Rate):</label>
+        <input type="text" name="rate" required inputmode="decimal" pattern="^\d+(\.\d+)?$"
+            title="Solo números; puedes usar punto para decimales (ej. 120 o 120.50)" />
+
+        <label>Activo:</label>
+        <input type="checkbox" name="is_active" checked />
+
+        <label>Foto de Perfil:</label>
+        <input type="file" name="profile_picture" accept="image/*" />
+
+        <button type="submit">Registrar</button>
+    </form>
+
+    <h2>Buscar Terapeutas</h2>
+    <div class="filters">
+        <input type="text" id="searchQuery" placeholder="Buscar por nombre, apellido, email, licencia, dni..." />
+        <button onclick="buscar()">Buscar</button>
+        <button onclick="resetear()">Resetear</button>
+    </div>
+
+    <table id="therapist-table">
+        <thead>
+            <tr>
+                <th>Documento</th>
+                <th>Nombre</th>
+                <th>Licencia</th>
+                <th>Email</th>
+                <th>Teléfono</th>
+                <th>Activo</th>
+                <th>Foto</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        const apiUrl = "http://127.0.0.1:8000/api/therapists/";
+        const form = document.getElementById("therapist-form");
+        const tableBody = document.querySelector("#therapist-table tbody");
+        const searchInput = document.getElementById("searchQuery");
+
+        // Control para cancelar peticiones previas
+        let currentAbortController = null;
+
+        // Al cargar: trae todo
+        window.onload = () => cargar();
+
+        // Busqueda en tiempo real
+        searchInput.addEventListener(
+            "input",
+            throttle(() => {
+                cargar(searchInput.value.trim()); // se dispara durante la escritura
+            }, 120)
+        );
+
+        function cargar(query = "") {
+            // Cancela la solicitud previa si sigue en vuelo
+            if (currentAbortController) currentAbortController.abort();
+            currentAbortController = new AbortController();
+
+            let url = apiUrl;
+            if (query) url += `?search=${encodeURIComponent(query)}`;
+
+            renderLoading();
+
+            fetch(url, { signal: currentAbortController.signal })
+                .then((res) => res.json())
+                .then((data) => renderRows(data))
+                .catch((err) => {
+                    if (err.name !== "AbortError") {
+                        console.error(err);
+                        renderError();
+                    }
+                });
+        }
+
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            const formData = new FormData(form);
+            formData.set("is_active", form.is_active.checked); // Asegura booleano
+
+            fetch(apiUrl, {
+                method: "POST",
+                body: formData,
+            })
+                .then((res) => res.json())
+                .then((terapeuta) => {
+                    agregarFila(terapeuta, true);
+                    form.reset();
+                    form.is_active.checked = true;
+                });
+        });
+
+        function renderRows(data) {
+            tableBody.innerHTML = "";
+            if (!data || data.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#777;">Sin resultados</td></tr>`;
+                return;
+            }
+            data.forEach((t) => agregarFila(t));
+        }
+
+        function renderLoading() {
+            tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#777;">Cargando...</td></tr>`;
+        }
+
+        function renderError() {
+            tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#c00;">Error al cargar datos</td></tr>`;
+        }
+
+        function agregarFila(t, prepend = false) {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+    <td>${t.document ?? ""}</td>
+    <td>${t.first_name ?? ""} ${t.last_name ?? ""}</td>
+    <td>${t.license_number ?? ""}</td>
+    <td>${t.email ?? ""}</td>
+    <td>${t.phone ?? ""}</td>
+    <td>${t.is_active ? "Sí" : "No"}</td>
+    <td>${t.profile_picture
+                    ? `<img src="${t.profile_picture}" alt="Foto" width="60"/>`
+                    : ""
+                }</td>
+  `;
+
+            if (prepend) {
+                tableBody.insertBefore(row, tableBody.firstChild); // siempre arriba
+            } else {
+                tableBody.appendChild(row);
+            }
+        }
+
+        // Botones existentes siguen funcionando
+        function buscar() {
+            cargar(searchInput.value.trim());
+        }
+        function resetear() {
+            searchInput.value = "";
+            cargar();
+        }
+
+        // Utilidad: throttle simple
+        function throttle(fn, wait = 100) {
+            let last = 0,
+                timer;
+            return (...args) => {
+                const now = Date.now();
+                const remaining = wait - (now - last);
+                if (remaining <= 0) {
+                    last = now;
+                    fn.apply(null, args);
+                } else {
+                    clearTimeout(timer);
+                    timer = setTimeout(() => {
+                        last = Date.now();
+                        fn.apply(null, args);
+                    }, remaining);
+                }
+            };
+        }
+
+        // Enforcers en tiempo real (teclado y pegado)
+        const onlyDigits = (max) => (e) => {
+            e.target.value = e.target.value.replace(/\D/g, "").slice(0, max);
+        };
+
+        const onlyDecimal = (e) => {
+            // permite dígitos y un solo punto decimal
+            let v = e.target.value
+                .replace(/[^\d.]/g, "") // quita todo lo que no sea digito o punto
+                .replace(/(\..*)\./g, "$1"); // evita dos puntos
+            e.target.value = v;
+        };
+
+        document
+            .querySelector('input[name="document"]')
+            .addEventListener("input", onlyDigits(9));
+        document
+            .querySelector('input[name="license_number"]')
+            .addEventListener("input", onlyDigits(20));
+        document
+            .querySelector('input[name="years_experience"]')
+            .addEventListener("input", onlyDigits(2));
+        document
+            .querySelector('input[name="phone"]')
+            .addEventListener("input", onlyDigits(15));
+        document
+            .querySelector('input[name="rate"]')
+            .addEventListener("input", onlyDecimal);
+
+        function renderRows(data) {
+            tableBody.innerHTML = "";
+            if (!data || data.length === 0) {
+                tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#777;">Sin resultados</td></tr>`;
+                return;
+            }
+            // Invierte el orden: últimos primero
+            data
+                .slice()
+                .reverse()
+                .forEach((t) => agregarFila(t));
+        }
+    </script>
+</body>
+
+</html>

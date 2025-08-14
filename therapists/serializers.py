@@ -4,4 +4,4 @@ from .models import Therapist
 class TherapistSerializer(serializers.ModelSerializer):
     class Meta:
         model = Therapist
-        fields = 'all'
+        fields = '__all__'

@@ -12,17 +12,10 @@ from .serializers import TherapistSerializer
 
 
 class TherapistViewSet(viewsets.ModelViewSet):
-    """
-    ViewSet para manejar operaciones CRUD de terapeutas.
-    Incluye soft delete, restauración y filtros.
-    """
+    queryset = Therapist.objects.all()
     serializer_class = TherapistSerializer
-    queryset = Therapist.objects.all()  # pylint: disable=no-member
     filter_backends = [filters.SearchFilter]
-    search_fields = [
-        'first_name', 'last_name_paternal', 'last_name_maternal',
-        'document_number', 'document_type', 'email', 'phone', 'location'
-    ]
+    search_fields = ['first_name', 'last_name', 'license_number', 'email', 'document']
 
 def index(request):
     """
