@@ -8,38 +8,64 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            margin: 40px;
+            margin: 30px;
+            background-color: #f7f7f7;
         }
 
-        form,
-        .filters,
-        table {
-            max-width: 800px;
-            margin-bottom: 30px;
+        h1,
+        h2 {
+            text-align: center;
+        }
+
+        form {
+            max-width: 1000px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
         }
 
         label {
-            display: block;
-            margin-top: 10px;
             font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
         }
 
         input,
-        textarea {
+        select,
+        textarea,
+        button {
             width: 100%;
             padding: 8px;
-            margin-top: 5px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 60px;
         }
 
         button {
-            margin-top: 15px;
-            padding: 10px 20px;
-            font-size: 16px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
         }
 
         table {
             border-collapse: collapse;
             width: 100%;
+            margin-top: 30px;
+            background: white;
         }
 
         th,
@@ -52,58 +78,145 @@
         th {
             background-color: #f0f0f0;
         }
+
+        .filters {
+            max-width: 1000px;
+            margin: auto;
+            margin-top: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filters input {
+            flex: 1;
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        .filters button {
+            padding: 6px 12px;
+            font-size: 14px;
+            cursor: pointer;
+            border-radius: 5px;
+            border: none;
+            background-color: #007bff;
+            color: white;
+        }
+
+        .filters button:hover {
+            background-color: #0056b3;
+        }
+
+        .full-width {
+            grid-column: 1 / -1;
+        }
+
+        #editModal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        #editModal .card {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            min-width: 350px;
+            max-width: 95vw;
+            position: relative;
+        }
     </style>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 
 <body>
+
     <h1>Registrar Terapeuta</h1>
     <form id="therapist-form" enctype="multipart/form-data">
-        <label>Documento:</label>
-        <input type="text" name="document" required inputmode="numeric" pattern="\d{1,9}" maxlength="9"
-            title="Solo números (máximo 9 dígitos)" />
-
-        <label>Nombres:</label>
-        <input type="text" name="first_name" required />
-
-        <label>Apellidos:</label>
-        <input type="text" name="last_name" required />
-
-        <label>Número de Licencia:</label>
-        <input type="text" name="license_number" required inputmode="numeric" pattern="\d{1,20}" maxlength="20"
-            title="Solo números (máximo 20 dígitos)" />
-
-        <label>Años de Experiencia:</label>
-        <input type="text" name="years_experience" required inputmode="numeric" pattern="\d{1,2}" maxlength="2"
-            title="Solo números (máximo 2 dígitos)" />
-
-        <label>Teléfono:</label>
-        <input type="text" name="phone" required inputmode="numeric" pattern="\d{1,15}" maxlength="15"
-            title="Solo números (máximo 15 dígitos)" />
-
-        <label>Email:</label>
-        <input type="email" name="email" required />
-
-        <label>Dirección:</label>
-        <textarea name="address" required></textarea>
-
-        <label>Tarifa (Rate):</label>
-        <input type="text" name="rate" required inputmode="decimal" pattern="^\d+(\.\d+)?$"
-            title="Solo números; puedes usar punto para decimales (ej. 120 o 120.50)" />
-
-        <label>Activo:</label>
-        <input type="checkbox" name="is_active" checked />
-
-        <label>Foto de Perfil:</label>
-        <input type="file" name="profile_picture" accept="image/*" />
-
-        <button type="submit">Registrar</button>
+        <div>
+            <label>Tipo de Documento:</label>
+            <select name="document_type" required>
+                <option value="">Seleccione</option>
+                <option value="DNI">DNI</option>
+                <option value="Carnet de Extranjeria">Carné de Extranjería</option>
+                <option value="Pasaporte">Pasaporte</option>
+                <option value="Carne de Refugiado">Carné de Refugiado</option>
+                <option value="PTP">PTP</option>
+            </select>
+        </div>
+        <div>
+            <label>Nro Documento:</label>
+            <input type="text" name="document_number" required maxlength="20" />
+        </div>
+        <div>
+            <label>Apellido Paterno:</label>
+            <input type="text" name="last_name_paternal" required />
+        </div>
+        <div>
+            <label>Apellido Materno:</label>
+            <input type="text" name="last_name_maternal" />
+        </div>
+        <div>
+            <label>Nombres:</label>
+            <input type="text" name="first_name" required />
+        </div>
+        <div>
+            <label>Fecha de Nacimiento:</label>
+            <input type="date" name="birth_date" required />
+        </div>
+        <div>
+            <label>Sexo:</label>
+            <select name="gender" required>
+                <option value="">Seleccione</option>
+                <option value="Masculino">Masculino</option>
+                <option value="Femenino">Femenino</option>
+                <option value="Otro">Otro</option>
+            </select>
+        </div>
+        <div>
+            <label>Teléfono:</label>
+            <input type="text" name="phone" required maxlength="15" />
+        </div>
+        <div>
+            <label>Email:</label>
+            <input type="email" name="email" required />
+        </div>
+        <div>
+            <label>Ubicación:</label>
+            <input type="text" name="location" />
+        </div>
+        <div class="full-width">
+            <label>Dirección:</label>
+            <textarea name="address" required></textarea>
+        </div>
+        <div class="full-width">
+            <label>Referencia Personal:</label>
+            <input type="text" name="personal_reference" />
+        </div>
+        <div>
+            <label>Activo:</label>
+            <input type="checkbox" name="is_active" checked />
+        </div>
+        <div>
+            <label>Foto de Perfil:</label>
+            <input type="file" name="profile_picture" accept="image/*" />
+        </div>
+        <div class="full-width">
+            <button type="submit">Registrar</button>
+        </div>
     </form>
 
     <h2>Buscar Terapeutas</h2>
     <div class="filters">
-        <input type="text" id="searchQuery" placeholder="Buscar por nombre, apellido, email, licencia, dni..." />
-        <button onclick="buscar()">Buscar</button>
-        <button onclick="resetear()">Resetear</button>
+        <input type="text" id="searchQuery" placeholder="Buscar por nombre, apellidos, documento, email...">
     </div>
 
     <table id="therapist-table">
@@ -111,127 +224,265 @@
             <tr>
                 <th>Documento</th>
                 <th>Nombre</th>
-                <th>Licencia</th>
+                <th>Fecha Nac.</th>
+                <th>Sexo</th>
                 <th>Email</th>
                 <th>Teléfono</th>
+                <th>Ubicación</th>
                 <th>Activo</th>
                 <th>Foto</th>
+                <th>Acciones</th>
             </tr>
         </thead>
         <tbody></tbody>
     </table>
 
+    <div id="editModal">
+        <div class="card">
+            <h2>Editar Terapeuta</h2>
+            <form id="editForm" enctype="multipart/form-data">
+                <input type="hidden" name="id" />
+                <div>
+                    <label>Tipo de Documento:</label>
+                    <select name="document_type" required>
+                        <option value="">Seleccione</option>
+                        <option value="DNI">DNI</option>
+                        <option value="Carnet de Extranjeria">Carné de Extranjería</option>
+                        <option value="Pasaporte">Pasaporte</option>
+                        <option value="Carne de Refugiado">Carné de Refugiado</option>
+                        <option value="PTP">PTP</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Nro Documento:</label>
+                    <input type="text" name="document_number" required maxlength="20" />
+                </div>
+                <div>
+                    <label>Apellido Paterno:</label>
+                    <input type="text" name="last_name_paternal" />
+                </div>
+                <div>
+                    <label>Apellido Materno:</label>
+                    <input type="text" name="last_name_maternal" />
+                </div>
+                <div>
+                    <label>Nombres:</label>
+                    <input type="text" name="first_name" required />
+                </div>
+                <div>
+                    <label>Fecha de Nacimiento:</label>
+                    <input type="date" name="birth_date" required />
+                </div>
+                <div>
+                    <label>Sexo:</label>
+                    <select name="gender" required>
+                        <option value="">Seleccione</option>
+                        <option value="Masculino">Masculino</option>
+                        <option value="Femenino">Femenino</option>
+                        <option value="Otro">Otro</option>
+                    </select>
+                </div>
+                <div>
+                    <label>Teléfono:</label>
+                    <input type="text" name="phone" required maxlength="15" />
+                </div>
+                <div>
+                    <label>Email:</label>
+                    <input type="email" name="email" required />
+                </div>
+                <div>
+                    <label>Ubicación:</label>
+                    <input type="text" name="location" />
+                </div>
+                <div>
+                    <label>Dirección:</label>
+                    <textarea name="address" required></textarea>
+                </div>
+                <div>
+                    <label>Referencia Personal:</label>
+                    <input type="text" name="personal_reference" />
+                </div>
+                <div>
+                    <label>Activo:</label>
+                    <input type="checkbox" name="is_active" />
+                </div>
+                <div>
+                    <label>Foto de Perfil:</label>
+                    <input type="file" name="profile_picture" accept="image/*" />
+                </div>
+                <div style="margin-top:15px; display:flex; gap:10px;">
+                    <button type="button" onclick="closeEditModal()">Cancelar</button>
+                    <button type="submit">Actualizar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="infoModal"
+        style="display:none; position:fixed; top:0; left:0; width:100vw; height:100vh; background:rgba(0,0,0,0.7); z-index:1000; align-items:center; justify-content:center;">
+        <div
+            style="background:#222; color:#fff; padding:30px; border-radius:15px; min-width:350px; max-width:95vw; position:relative;">
+            <h2 style="text-align:center; margin-bottom:10px;">Información del Terapeuta</h2>
+            <div id="infoContent"></div>
+            <div style="margin-top:20px; text-align:right;">
+                <button onclick="cerrarInfoModal()"
+                    style="background:#43b36a; color:#fff; padding:8px 20px; border:none; border-radius:5px;">Cerrar</button>
+            </div>
+            <button onclick="cerrarInfoModal()"
+                style="position:absolute; top:15px; right:15px; background:none; border:none; color:#fff; font-size:22px; cursor:pointer;">×</button>
+        </div>
+    </div>
+
     <script>
+
+        // Variables globales
         const apiUrl = "http://127.0.0.1:8000/api/therapists/";
         const form = document.getElementById("therapist-form");
         const tableBody = document.querySelector("#therapist-table tbody");
         const searchInput = document.getElementById("searchQuery");
-
-        // Control para cancelar peticiones previas
+        const editModal = document.getElementById("editModal");
+        const editForm = document.getElementById("editForm");
+        let editingRow = null;
         let currentAbortController = null;
 
-        // Al cargar: trae todo
-        window.onload = () => cargar();
+        // Constantes y helpers
+        const DOC_MAX = {
+            "DNI": 9,
+            "Carnet de Extranjeria": 12,
+            "Pasaporte": 9,
+            "Carne de Refugiado": 10,
+            "PTP": 9
+        };
+        const DOC_LENGTHS = {
+            "DNI": [8, 9],
+            "Carnet de Extranjeria": [12],
+            "Pasaporte": [9],
+            "Carne de Refugiado": [10],
+            "PTP": [9]
+        };
 
-        // Busqueda en tiempo real
-        searchInput.addEventListener(
-            "input",
-            throttle(() => {
-                cargar(searchInput.value.trim()); // se dispara durante la escritura
-            }, 120)
-        );
-
-        function cargar(query = "") {
-            // Cancela la solicitud previa si sigue en vuelo
-            if (currentAbortController) currentAbortController.abort();
-            currentAbortController = new AbortController();
-
-            let url = apiUrl;
-            if (query) url += `?search=${encodeURIComponent(query)}`;
-
-            renderLoading();
-
-            fetch(url, { signal: currentAbortController.signal })
-                .then((res) => res.json())
-                .then((data) => renderRows(data))
-                .catch((err) => {
-                    if (err.name !== "AbortError") {
-                        console.error(err);
-                        renderError();
-                    }
-                });
+        // Devuelve el HTML de una fila de terapeuta
+        function rowHTML(t) {
+            return `
+        <td>${t.document_type ?? ""} ${t.document_number ?? ""}</td>
+        <td>${t.first_name ?? ""} ${t.last_name_paternal ?? ""} ${t.last_name_maternal ?? ""}</td>
+        <td>${t.birth_date ?? ""}</td>
+        <td>${t.gender ?? ""}</td>
+        <td>${t.email ?? ""}</td>
+        <td>${t.phone ?? ""}</td>
+        <td>${t.location ?? ""}</td>
+        <td>${t.is_active ? "Sí" : "No"}</td>
+        <td>${t.profile_picture ? `<img src="${t.profile_picture}" alt="Foto" width="60"/>` : ""}</td>
+        <td>
+        <button onclick="editarTerapeuta('${t.id}',this)">Editar</button>
+      </td>
+    `;
+        }
+        // Crea FormData y normaliza campos especiales (checkbox)
+        function buildFormData(formEl) {
+            const fd = new FormData(formEl);
+            if (formEl.is_active) fd.set("is_active", formEl.is_active.checked);
+            return fd;
         }
 
-        form.addEventListener("submit", function (e) {
-            e.preventDefault();
+        // Restringe a números para los campos listados
+        function addNumericFilter(formEl, fieldNames) {
+            fieldNames.forEach(name => {
+                const f = formEl[name];
+                if (!f) return;
+                f.addEventListener("input", () => { f.value = f.value.replace(/\D/g, ""); });
+            });
+        }
 
-            const formData = new FormData(form);
-            formData.set("is_active", form.is_active.checked); // Asegura booleano
+        // Ajusta maxLength del documento según el tipo seleccionado
+        function wireDocTypeMaxLength(formEl) {
+            if (!formEl?.document_type || !formEl?.document_number) return;
+            const apply = () => {
+                const t = formEl.document_type.value;
+                formEl.document_number.value = (formEl.document_number.value || "").replace(/\D/g, "");
+                formEl.document_number.maxLength = DOC_MAX[t] || 20;
+            };
+            formEl.document_type.addEventListener("change", apply);
+            apply();
+        }
 
-            fetch(apiUrl, {
-                method: "POST",
-                body: formData,
-            })
-                .then((res) => res.json())
-                .then((terapeuta) => {
-                    agregarFila(terapeuta, true);
-                    form.reset();
-                    form.is_active.checked = true;
-                });
-        });
-
-        function renderRows(data) {
-            tableBody.innerHTML = "";
-            if (!data || data.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#777;">Sin resultados</td></tr>`;
-                return;
+        // Validaciones comunes para formularios
+        function validateCommon(formEl) {
+            // Requeridos
+            const requiredFields = formEl.querySelectorAll("[required]");
+            for (let field of requiredFields) {
+                if (!String(field.value || "").trim()) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Campo obligatorio',
+                        text: 'Por favor completa todos los campos obligatorios.'
+                    });
+                    field.focus();
+                    return false;
+                }
             }
-            data.forEach((t) => agregarFila(t));
-        }
 
-        function renderLoading() {
-            tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#777;">Cargando...</td></tr>`;
-        }
-
-        function renderError() {
-            tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#c00;">Error al cargar datos</td></tr>`;
-        }
-
-        function agregarFila(t, prepend = false) {
-            const row = document.createElement("tr");
-            row.innerHTML = `
-    <td>${t.document ?? ""}</td>
-    <td>${t.first_name ?? ""} ${t.last_name ?? ""}</td>
-    <td>${t.license_number ?? ""}</td>
-    <td>${t.email ?? ""}</td>
-    <td>${t.phone ?? ""}</td>
-    <td>${t.is_active ? "Sí" : "No"}</td>
-    <td>${t.profile_picture
-                    ? `<img src="${t.profile_picture}" alt="Foto" width="60"/>`
-                    : ""
-                }</td>
-  `;
-
-            if (prepend) {
-                tableBody.insertBefore(row, tableBody.firstChild); // siempre arriba
-            } else {
-                tableBody.appendChild(row);
+            // Documento por tipo
+            const docType = formEl.document_type?.value;
+            const docNumber = (formEl.document_number?.value || "").trim();
+            if (docType && DOC_LENGTHS[docType]) {
+                const allowed = DOC_LENGTHS[docType];
+                if (!allowed.includes(docNumber.length)) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Documento inválido',
+                        text: `El número de documento debe tener ${allowed.join(" o ")} dígitos para ${docType}.`
+                    });
+                    formEl.document_number.focus();
+                    return false;
+                }
             }
+
+            // Nombres y apellidos
+            const nameFields = ["first_name", "last_name_paternal", "last_name_maternal"];
+            for (let n of nameFields) {
+                const v = (formEl[n]?.value || "").trim();
+                if (v && !/^[A-Za-zÁÉÍÓÚÑáéíóúñ0-9\s]+$/.test(v)) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Nombre inválido',
+                        text: 'Los nombres y apellidos solo deben contener letras y números.'
+                    });
+                    formEl[n].focus();
+                    return false;
+                }
+            }
+
+            // Teléfono
+            const phone = (formEl.phone?.value || "").trim();
+            if (!/^\d{1,15}$/.test(phone)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Teléfono inválido',
+                    text: 'El teléfono debe tener solo números, máximo 15 dígitos.'
+                });
+                formEl.phone.focus();
+                return false;
+            }
+
+            // Email
+            const email = (formEl.email?.value || "").trim();
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Correo inválido',
+                    text: 'Formato de correo inválido.'
+                });
+                formEl.email.focus();
+                return false;
+            }
+            return true;
         }
 
-        // Botones existentes siguen funcionando
-        function buscar() {
-            cargar(searchInput.value.trim());
-        }
-        function resetear() {
-            searchInput.value = "";
-            cargar();
-        }
-
-        // Utilidad: throttle simple
+        // Para busqueda
         function throttle(fn, wait = 100) {
-            let last = 0,
-                timer;
+            let last = 0, timer;
             return (...args) => {
                 const now = Date.now();
                 const remaining = wait - (now - last);
@@ -248,48 +499,167 @@
             };
         }
 
-        // Enforcers en tiempo real (teclado y pegado)
-        const onlyDigits = (max) => (e) => {
-            e.target.value = e.target.value.replace(/\D/g, "").slice(0, max);
+        // Inicialización
+        window.onload = () => {
+            cargar();
+
+            // Reglas para formulario de registro
+            addNumericFilter(form, ["document_number", "phone"]);
+            wireDocTypeMaxLength(form);
+
+            // Reglas para formulario de edición
+            addNumericFilter(editForm, ["document_number", "phone"]);
+            wireDocTypeMaxLength(editForm);
         };
 
-        const onlyDecimal = (e) => {
-            // permite dígitos y un solo punto decimal
-            let v = e.target.value
-                .replace(/[^\d.]/g, "") // quita todo lo que no sea digito o punto
-                .replace(/(\..*)\./g, "$1"); // evita dos puntos
-            e.target.value = v;
-        };
+        // Búsqueda con throttle
+        searchInput.addEventListener("input", throttle(() => {
+            cargar(searchInput.value.trim());
+        }, 120));
 
-        document
-            .querySelector('input[name="document"]')
-            .addEventListener("input", onlyDigits(9));
-        document
-            .querySelector('input[name="license_number"]')
-            .addEventListener("input", onlyDigits(20));
-        document
-            .querySelector('input[name="years_experience"]')
-            .addEventListener("input", onlyDigits(2));
-        document
-            .querySelector('input[name="phone"]')
-            .addEventListener("input", onlyDigits(15));
-        document
-            .querySelector('input[name="rate"]')
-            .addEventListener("input", onlyDecimal);
+        // Carga y render
+        function cargar(query = "") {
+            if (currentAbortController) currentAbortController.abort();
+            currentAbortController = new AbortController();
+            let url = apiUrl;
+            if (query) url += `?search=${encodeURIComponent(query)}`;
+            renderLoading();
+            fetch(url, { signal: currentAbortController.signal })
+                .then(res => res.json())
+                .then(data => renderRows(data))
+                .catch(err => {
+                    if (err.name !== "AbortError") {
+                        console.error(err);
+                        renderError();
+                    }
+                });
+        }
 
+        // Renderiza todas las filas de la tabla
         function renderRows(data) {
             tableBody.innerHTML = "";
             if (!data || data.length === 0) {
-                tableBody.innerHTML = `<tr><td colspan="7" style="text-align:center;color:#777;">Sin resultados</td></tr>`;
+                tableBody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:#777;">Sin resultados</td></tr>`;
                 return;
             }
-            // Invierte el orden: últimos primero
-            data
-                .slice()
-                .reverse()
-                .forEach((t) => agregarFila(t));
+            data.slice().reverse().forEach(t => agregarFila(t));
+        }
+
+        // Estados de carga / error
+        function renderLoading() {
+            tableBody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:#777;">Cargando...</td></tr>`;
+        }
+
+        function renderError() {
+            tableBody.innerHTML = `<tr><td colspan="10" style="text-align:center;color:#c00;">Error al cargar datos</td></tr>`;
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Error al cargar datos de terapeutas.'
+            });
+        }
+
+        // Agrega una fila a la tabla al inicio
+        function agregarFila(t, prepend = false) {
+            const row = document.createElement("tr");
+            row.innerHTML = rowHTML(t);
+            if (prepend) tableBody.insertBefore(row, tableBody.firstChild);
+            else tableBody.appendChild(row);
+        }
+
+        // Modal para edicion
+        function openEditModal(terapeuta, row) {
+            editingRow = row;
+            editModal.style.display = "flex";
+            // Rellenar campos
+            for (const key in terapeuta) {
+                if (editForm[key] !== undefined) {
+                    if (editForm[key].type === "checkbox") {
+                        editForm[key].checked = !!terapeuta[key];
+                    } else {
+                        editForm[key].value = terapeuta[key] ?? "";
+                    }
+                }
+            }
+            wireDocTypeMaxLength(editForm);
+        }
+
+        function closeEditModal() {
+            editModal.style.display = "none";
+            editForm.reset();
+            editingRow = null;
+        }
+
+        // Submit editar
+        editForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+            if (!validateCommon(editForm)) return;
+
+            const id = editForm.id.value;
+            const formData = buildFormData(editForm);
+
+            fetch(apiUrl + id + "/", { method: "PUT", body: formData })
+                .then(res => {
+                    if (!res.ok) throw new Error("Error al actualizar");
+                    return res.json();
+                })
+                .then(terapeuta => {
+                    if (editingRow) editingRow.innerHTML = rowHTML(terapeuta);
+                    closeEditModal();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Actualizado',
+                        text: 'El terapeuta ha sido actualizado correctamente.'
+                    });
+                })
+                .catch(() => {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'No se pudo actualizar el terapeuta.'
+                    });
+                });
+        });
+
+        // Submit registrar
+        form.addEventListener("submit", function (e) {
+            e.preventDefault();
+            if (!validateCommon(form)) return;
+
+            const formData = buildFormData(form);
+            fetch(apiUrl, { method: "POST", body: formData })
+                .then(res => {
+                    if (!res.ok) throw new Error("Error al crear");
+                    return res.json();
+                })
+                .then(nuevo => {
+                    agregarFila(nuevo, true);
+                    form.reset();
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Registrado',
+                        text: 'El terapeuta ha sido registrado correctamente.'
+                    });
+                })
+                .catch(() => {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'No se pudo registrar el terapeuta.'
+                    });
+                });
+        });
+        // Funcion de CRUD - Editar Terapeuta por ID
+        function editarTerapeuta(id, btn) {
+            fetch(apiUrl + id + "/")
+                .then(res => res.json())
+                .then(terapeuta => {
+                    openEditModal(terapeuta, btn.closest("tr"));
+                });
         }
     </script>
+
+
 </body>
 
 </html>
