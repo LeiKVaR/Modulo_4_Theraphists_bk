@@ -192,10 +192,26 @@
       <label>Email:</label>
       <input type="email" name="email" required />
     </div>
+    <!-- Ubicación -->
     <div>
-      <label>Ubicación:</label>
-      <input type="text" name="location" />
+      <label>Departamento:</label>
+      <select name="department" id="department" required>
+        <option value="">Seleccione</option>
+      </select>
     </div>
+    <div>
+      <label>Provincia:</label>
+      <select name="province" id="province" required>
+        <option value="">Seleccione</option>
+      </select>
+    </div>
+    <div>
+      <label>Distrito</label>
+      <select name="district" id="district" required>
+        <option value="">Seleccione</option>
+      </select>
+    </div>
+
     <div class="full-width">
       <label>Dirección:</label>
       <textarea name="address" required></textarea>
@@ -370,8 +386,22 @@
           <input type="email" name="email" required />
         </div>
         <div>
-          <label>Ubicación:</label>
-          <input type="text" name="location" />
+          <label>Departamento:</label>
+          <select name="department" id="edit_department" required>
+            <option value="">Seleccione</option>
+          </select>
+        </div>
+        <div>
+          <label>Provincia:</label>
+          <select name="province" id="edit_province" required>
+            <option value="">Seleccione</option>
+          </select>
+        </div>
+        <div>
+          <label>Distrito:</label>
+          <select name="district" id="edit_district" required>
+            <option value="">Seleccione</option>
+          </select>
         </div>
         <div>
           <label>Dirección:</label>
