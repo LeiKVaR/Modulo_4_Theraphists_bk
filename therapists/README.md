@@ -94,8 +94,6 @@ urlpatterns = [
 | GET    | `/api/therapists/<id>/`       | Obtiene un terapeuta específico             | `id` (path)        |
 | PUT    | `/api/therapists/<id>/`       | Actualiza un terapeuta                      | `id` (path), body  |
 | DELETE | `/api/therapists/<id>/`       | Elimina un terapeuta                        | `id` (path)        |
-| GET    | `/api/specialties/`           | Lista todas las especialidades              |                    |
-| POST   | `/api/specialties/`           | Crea una especialidad                       | JSON body          |
 
 #### Ejemplo de respuesta (GET `/api/therapists/`):
 
@@ -117,7 +115,6 @@ urlpatterns = [
     "personal_reference": "Referencia",
     "is_active": true,
     "profile_picture": "url/imagen.jpg",
-    "specialties": [1, 2]
   }
 ]
 ```
