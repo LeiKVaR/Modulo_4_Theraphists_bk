@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Therapist
+from ..models import Therapist
 
 class TherapistSerializer(serializers.ModelSerializer):
     class Meta:

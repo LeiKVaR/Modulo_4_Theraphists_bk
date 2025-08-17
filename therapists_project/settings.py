@@ -40,7 +40,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'rest_framework', # Codigo agregado Chris
     'therapists', # Codigo agregado Chris
-    'corsheaders',
+    'corsheaders', # Permite que otras IP locales externas puedan interactuar con mi IP local
 ]
 
 MIDDLEWARE = [

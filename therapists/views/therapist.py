@@ -8,9 +8,8 @@ from django.shortcuts import render
 from rest_framework import viewsets, filters, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
-from .models import Therapist
-from .serializers import TherapistSerializer
-
+from ..models import Therapist
+from ..serializers import TherapistSerializer
 
 class TherapistViewSet(viewsets.ModelViewSet):
     """
@@ -22,7 +21,8 @@ class TherapistViewSet(viewsets.ModelViewSet):
     filter_backends = [filters.SearchFilter]
     search_fields = [
         'first_name', 'last_name_paternal', 'last_name_maternal',
-        'document_number', 'document_type', 'email', 'phone', 'location'
+        'document_number', 'document_type', 'email', 'phone', 'country',
+        'department', 'province', 'district', 'address'
     ]
 
     def get_queryset(self):

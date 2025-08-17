@@ -1,94 +1,124 @@
-
-import pytest
+from django.test import TestCase
 from django.urls import reverse
-from rest_framework.test import APIClient
-from therapists.models import Therapist
+from rest_framework.test import APITestCase
+from rest_framework import status
+from ..models import Therapist, Specialization, Certification, Schedule
+from datetime import date, time
 
-@pytest.fixture
-def api_client():
-    return APIClient()
+class TherapistViewsTest(APITestCase):
+    def setUp(self):
+        self.therapist_data = {
+            'document_type': 'DNI',
+            'document_number': '12345678',
+            'last_name_paternal': 'García',
+            'last_name_maternal': 'López',
+            'first_name': 'Juan',
+            'birth_date': '1990-01-01',
+            'gender': 'Masculino',
+            'phone': '123456789',
+            'email': 'juan@example.com'
+        }
+        self.therapist = Therapist.objects.create(**{
+            'document_type': 'DNI',
+            'document_number': '87654321',
+            'last_name_paternal': 'García',
+            'last_name_maternal': 'López',
+            'first_name': 'Juan',
+            'birth_date': date(1990, 1, 1),
+            'gender': 'Masculino',
+            'phone': '123456789',
+            'email': 'juan@example.com'
+        })
 
-@pytest.fixture
-def therapist_data():
-    return {
-        "first_name": "Ana",
-        "last_name_paternal": "Gómez",
-        "last_name_maternal": "López",
-        "document_number": "87654321",
-        "document_type": "DNI",
-        "birth_date": "1990-05-15",
-        "gender": "Femenino",
-        "email": "ana@example.com",
-        "phone": "987654321",
-        "country": "Perú",
-        "address": "Av. Siempre Viva 123",
-        "department": "Lima",
-        "province": "Lima",
-        "district": "Miraflores",
-        "personal_reference": None,    # <-- Agregado
-        "profile_picture": None,       # <-- Agregado
-    }
+    def test_create_therapist(self):
+        url = reverse('therapist-list')
+        response = self.client.post(url, self.therapist_data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Therapist.objects.count(), 2)
 
-@pytest.fixture
-def therapist(db, therapist_data):
-    return Therapist.objects.create(**therapist_data)
+    def test_list_therapists(self):
+        url = reverse('therapist-list')
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 1)
 
-@pytest.mark.django_db
-def test_list_therapists(api_client, therapist):
-    url = reverse('therapist-list')
-    response = api_client.get(url)
-    assert response.status_code == 200
-    assert any(t['id'] == therapist.id for t in response.data)
+    def test_retrieve_therapist(self):
+        url = reverse('therapist-detail', args=[self.therapist.id])
+        response = self.client.get(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['first_name'], 'Juan')
 
-@pytest.mark.django_db
-def test_create_therapist(api_client, therapist_data):
-    url = reverse('therapist-list')
-    # Elimina dinámicamente los campos con valor None
-    data = {k: v for k, v in therapist_data.items() if v is not None}
-    response = api_client.post(url, data)
-    print("RESPONSE DATA:", response.data)
-    assert response.status_code == 201
-    assert Therapist.objects.filter(email="ana@example.com").exists()
-    
-@pytest.mark.django_db
-def test_soft_delete_therapist(api_client, therapist):
-    url = reverse('therapist-detail', args=[therapist.id])
-    response = api_client.delete(url)
-    assert response.status_code == 204
-    therapist.refresh_from_db()
-    assert therapist.is_active is False
+    def test_soft_delete_therapist(self):
+        url = reverse('therapist-detail', args=[self.therapist.id])
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        self.therapist.refresh_from_db()
+        self.assertFalse(self.therapist.is_active)
 
-@pytest.mark.django_db
-def test_restore_therapist(api_client, therapist):
-    therapist.is_active = False
-    therapist.save()
-    url = reverse('therapist-restore', args=[therapist.id])
-    response = api_client.post(url)
-    assert response.status_code == 200
-    therapist.refresh_from_db()
-    assert therapist.is_active is True
+    def test_restore_therapist(self):
+        self.therapist.is_active = False
+        self.therapist.save()
+        url = reverse('therapist-restore', args=[self.therapist.id])
+        response = self.client.post(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.therapist.refresh_from_db()
+        self.assertTrue(self.therapist.is_active)
 
-@pytest.mark.django_db
-def test_inactive_therapists(api_client, therapist):
-    therapist.is_active = False
-    therapist.save()
-    url = reverse('therapist-inactive')
-    response = api_client.get(url)
-    assert response.status_code == 200
-    assert any(t['id'] == therapist.id for t in response.data)
+class SpecializationViewsTest(APITestCase):
+    def test_create_specialization(self):
+        data = {
+            'name': 'Psicología Clínica',
+            'description': 'Especialidad en psicología clínica'
+        }
+        url = reverse('specialization-list')
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Specialization.objects.count(), 1)
 
-@pytest.mark.django_db
-def test_filter_active_therapists(api_client, therapist):
-    url = reverse('therapist-list')
-    response = api_client.get(url, {'active': 'true'})
-    assert response.status_code == 200
-    assert any(t['id'] == therapist.id for t in response.data)
+class CertificationViewsTest(APITestCase):
+    def setUp(self):
+        self.therapist = Therapist.objects.create(
+            document_type='DNI',
+            document_number='12345678',
+            last_name_paternal='García',
+            first_name='Juan',
+            birth_date=date(1990, 1, 1),
+            gender='Masculino',
+            phone='123456789'
+        )
 
-@pytest.mark.django_db
-def test_filter_inactive_therapists(api_client, therapist):
-    therapist.is_active = False
-    therapist.save()
-    url = reverse('therapist-list')
-    response = api_client.get(url, {'active': 'false'})
-    assert response.status_code == 200
-    assert any(t['id'] == therapist.id for t in response.data)
+    def test_create_certification(self):
+        data = {
+            'therapist': self.therapist.id,
+            'name': 'Certificación en Psicología',
+            'issuing_organization': 'Universidad XYZ',
+            'issue_date': '2020-01-01'
+        }
+        url = reverse('certification-list')
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Certification.objects.count(), 1)
+
+class ScheduleViewsTest(APITestCase):
+    def setUp(self):
+        self.therapist = Therapist.objects.create(
+            document_type='DNI',
+            document_number='12345678',
+            last_name_paternal='García',
+            first_name='Juan',
+            birth_date=date(1990, 1, 1),
+            gender='Masculino',
+            phone='123456789'
+        )
+
+    def test_create_schedule(self):
+        data = {
+            'therapist': self.therapist.id,
+            'day_of_week': 'monday',
+            'start_time': '09:00:00',
+            'end_time': '17:00:00'
+        }
+        url = reverse('schedule-list')
+        response = self.client.post(url, data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(Schedule.objects.count(), 1)
